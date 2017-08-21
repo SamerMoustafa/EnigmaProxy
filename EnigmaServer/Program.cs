@@ -10,6 +10,18 @@ namespace EnigmaServer
     {
         static void Main(string[] args)
         {
+            //Set Console Title
+            Console.Title = "[Enigma] Server";
+            Console.ForegroundColor = ConsoleColor.Yellow;
+
+
+            
+            String InlineCommand = Console.ReadLine();
+            while (InlineCommand != "exit")
+            {
+                InlineCommand = Console.ReadLine();
+            }
+            ///TODO: Add Exist Routine
         }
     }
 }

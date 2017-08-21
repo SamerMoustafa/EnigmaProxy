@@ -10,6 +10,16 @@ namespace EnigmaClient
     {
         static void Main(string[] args)
         {
+            //Set Console Title
+            Console.Title = "[Enigma] Client";
+            Console.ForegroundColor = ConsoleColor.Cyan;
+
+            String InlineCommand = Console.ReadLine();
+            while(InlineCommand != "exit")
+            {
+                InlineCommand = Console.ReadLine();
+            }
+            ///TODO: Add Exist Routine
         }
     }
 }
