@@ -17,6 +17,7 @@ namespace EnigmaServer
 
             //Start Server
             Logger.GetInstance().Log("Starting Server Routine ....", "Main");
+            Server.GetInstance().Setup();
             
             String InlineCommand = Console.ReadLine();
             while (InlineCommand != "exit")
