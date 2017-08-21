@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EnigmaLibrary
 {
-    class Logger
+    public class Logger
     {
 
         protected static readonly Logger _Instance = new Logger();
@@ -28,7 +28,8 @@ namespace EnigmaLibrary
 
         public void Log(String message, object reference)
         {
-            message = String.Format("[ {0} ] : {1}", reference.GetType().ToString(), message);
+            String ReferenceName = (reference.GetType().ToString() == "System.String") ? (string)reference : reference.GetType().ToString();
+            message = String.Format("[{0}] : {1}",ReferenceName, message);
             Log(message);
         }
 

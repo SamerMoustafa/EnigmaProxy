@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EnigmaLibrary
 {
-    class Request
+    public class Request
     {
 
         public String Path;
