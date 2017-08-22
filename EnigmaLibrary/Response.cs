@@ -8,5 +8,16 @@ namespace EnigmaLibrary
 {
     public class Response
     {
+
+
+        public static Response GetInstance()
+        {
+            return new Response();
+        }
+
+        public Response Parse(byte[] buffer)
+        {
+            return null;
+        }
     }
 }

@@ -18,12 +18,17 @@ namespace EnigmaServer
 
         public byte[] Buffer = new byte[Server.MAX_BUFFER_SIZE];
 
+
         public Client(Socket clientSocket)
         {
             Socket = clientSocket;
             Address = IPAddress.Parse(((IPEndPoint)Socket.RemoteEndPoint).Address.ToString());
         }
 
+        public void Async()
+        {
+
+        }
 
         public void SendResponse(Response response)
         {
