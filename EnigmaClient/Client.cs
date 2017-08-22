@@ -51,7 +51,7 @@ namespace EnigmaClient
 
         private void _Server_OnServerShakeHand()
         {
-            
+            _Log.Log("Recieved a Public Key with Size of " + _Server.PublicKey.Length + " Bytes", this);
         }
     }
 }

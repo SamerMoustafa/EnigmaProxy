@@ -28,6 +28,8 @@ namespace EnigmaServer
 
         protected Server() { }
 
+        
+
         public static Server GetInstance()
         {
             return _Instance;
@@ -46,6 +48,16 @@ namespace EnigmaServer
             _Log.EndSection();
         }
 
+        public void RemoveClient(Client client)
+        {
+            int clientIndex = Clients.IndexOf(client);
+            if ( clientIndex >= 0)
+            {
+                Clients.Remove(client);
+                _Log.Log("Client #" + clientIndex.ToString() + " has been removed from Clients List", this);
+            }
+        }
+
         protected void AcceptClients()
         {
             _ServerSocket.BeginAccept(new AsyncCallback(AcceptCallback), null);
@@ -53,10 +65,12 @@ namespace EnigmaServer
 
         private void AcceptCallback(IAsyncResult ar)
         {
+
             Socket connectedSocket = _ServerSocket.EndAccept(ar);
+            _Log.Log("A Client Requested to Connect to Server....", this);
             Client client = new Client(connectedSocket);
             Clients.Add(client);
-            _Log.Log("Client #["+Clients.IndexOf(client)+"] Connected to Server From IP : [" + client.Address.ToString() + "]", this);
+            _Log.Log("["+client.Address.ToString()+"] Client #[" + Clients.IndexOf(client) + "] Connected to Server", this);
             //Keep Async with Client
             client.Async();
             //Accept More Clients

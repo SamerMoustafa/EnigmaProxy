@@ -18,16 +18,72 @@ namespace EnigmaServer
 
         public byte[] Buffer = new byte[Server.MAX_BUFFER_SIZE];
 
+        public PacketCrypter Crypter { get; protected set; }
+
+        protected Logger _Log = Logger.GetInstance();
 
         public Client(Socket clientSocket)
         {
             Socket = clientSocket;
+            _Log.Log("Analyze Client End Point....", this);
             Address = IPAddress.Parse(((IPEndPoint)Socket.RemoteEndPoint).Address.ToString());
+            _Log.Log("Generate Packet Crypter Instance for Client", this);
+            Crypter = new PacketCrypter();
         }
 
         public void Async()
         {
+            Socket.BeginReceive(Buffer, 0, Server.MAX_BUFFER_SIZE, SocketFlags.None, new AsyncCallback(AsyncReceiveCallback), null);
+        }
 
+        private void AsyncReceiveCallback(IAsyncResult ar)
+        {
+            int received = Socket.EndReceive(ar);
+            if(received == 1)
+            {
+                int RequestCode = (int)Buffer[0];
+                switch(RequestCode)
+                {
+                    case 1:
+                        _Log.Log("Client Requested a Handshake ...", this);
+                        SendPublicKey();
+                        break;
+                    default: break;
+                }
+            }
+            else
+            {
+
+            }
+            Async();
+
+        }
+
+        private void SendPublicKey()
+        {
+            try
+            {
+                _Log.Log("Sending Packet Crypter Public Key to the Client...", this);
+                Socket.Send(Crypter.PublicKey);
+                _Log.Log("Public Key with Size of " + Crypter.PublicKey.Length + " Bytes Has been Sent", this);
+            }
+            catch(Exception ex)
+            {
+                _Log.Log("Client Refused to Recieve Packet, Shutdown ....", this);
+                Shutdown();
+            }
+            
+        }
+
+        private void Shutdown(String reason = null)
+        {
+            Server.GetInstance().RemoveClient(this);
+            Socket.Shutdown(SocketShutdown.Both);
+            Socket.Dispose();
+            if(reason != null)
+            {
+                _Log.Log("Shutdown Reason : " + reason);
+            }
         }
 
         public void SendResponse(Response response)

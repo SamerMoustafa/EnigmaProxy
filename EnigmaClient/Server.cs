@@ -20,7 +20,7 @@ namespace EnigmaClient
 
         protected int ServerPort = 90;
 
-        public Byte[] PublicKey;
+        public Byte[] PublicKey { get; protected set; }
 
         public byte[] RecieveBytes = new byte[2048];
 
@@ -34,7 +34,20 @@ namespace EnigmaClient
 
         public event ServerShakeHanded OnServerShakeHand;
 
-        protected Boolean IsConnected = false;
+        public delegate void ServerDisconnected();
+
+        public event ServerDisconnected OnServerDisconnected;
+
+        protected bool _IsConnected = false;
+
+        public Boolean IsConnected {
+            get { return _IsConnected; }
+            protected set {
+                _IsConnected = value;
+                if (value == false) { OnServerDisconnected(); }
+                else { OnServerConnected(); }
+            }
+        }
 
         protected Server()
         {
@@ -61,13 +74,34 @@ namespace EnigmaClient
                 }
                 _Log.Log("Connected to the Proxy Server within " + Attempts + " Attemp(s).", this);
                 _Log.Log("Triggering OnServerConnected Event...", this);
-                OnServerConnected();
+                IsConnected = true;
             })).Start();
         }
 
+
         public void Shakehand()
         {
-
+            byte[] shakeHandCodeBuffer = new byte[1] { 1 };
+            byte[] recieveBuffer = new byte[2048];
+            _Log.Log("Starting Server Shakehand Thread, waiting to Respond....", this);
+            new Thread(new ThreadStart(() => {
+                try
+                { 
+                    _ServerSocket.Send(shakeHandCodeBuffer);
+                    int recieved = _ServerSocket.Receive(recieveBuffer, SocketFlags.None);
+                    PublicKey = new byte[recieved];
+                    Array.Copy(recieveBuffer, PublicKey, recieved);
+                    OnServerShakeHand();
+                }
+                catch (Exception ex)
+                {
+                    _Log.Log("Failed to Shakehand Server, Shutting Down Connection ... ", this);
+                    _Log.Log("Shutdown Reason : " + ex.Message, this);
+                    _ServerSocket.Shutdown(SocketShutdown.Both);
+                    IsConnected = false;
+                }
+                
+            })).Start();
         }
 
 
