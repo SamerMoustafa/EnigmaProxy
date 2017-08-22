@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IRequestHandler.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="IPacket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
