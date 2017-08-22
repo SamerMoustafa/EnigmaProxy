@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EnigmaServer
@@ -38,26 +39,37 @@ namespace EnigmaServer
 
         private void AsyncReceiveCallback(IAsyncResult ar)
         {
-            int received = Socket.EndReceive(ar);
-            if(received == 1)
+            try
             {
-                int RequestCode = (int)Buffer[0];
-                switch(RequestCode)
+                int received = Socket.EndReceive(ar);
+                if (received == 1)
                 {
-                    case 1:
-                        _Log.Log("Client Requested a Handshake ...", this);
-                        SendPublicKey();
-                        break;
-                    default: break;
+                    int RequestCode = (int)Buffer[0];
+                    switch (RequestCode)
+                    {
+                        case 1:
+                            _Log.Log("Client Requested a Handshake ...", this);
+                            SendPublicKey();
+                            break;
+                        default: break;
+                    }
                 }
-            }
-            else
-            {
+                else
+                {
 
+                }
+                Async();
             }
-            Async();
+            catch(Exception ex)
+            {
+                _Log.Log("Client Disconnected, Shutting Down ....", this);
+                Shutdown(ex.Message);
+                Server.GetInstance().RemoveClient(this);
+            }
+            
 
         }
+
 
         private void SendPublicKey()
         {
@@ -72,17 +84,16 @@ namespace EnigmaServer
                 _Log.Log("Client Refused to Recieve Packet, Shutdown ....", this);
                 Shutdown();
             }
-            
         }
 
-        private void Shutdown(String reason = null)
+        public void Shutdown(String reason = null)
         {
             Server.GetInstance().RemoveClient(this);
             Socket.Shutdown(SocketShutdown.Both);
             Socket.Dispose();
             if(reason != null)
             {
-                _Log.Log("Shutdown Reason : " + reason);
+                _Log.Log("Shutdown Reason : " + reason, this);
             }
         }
 

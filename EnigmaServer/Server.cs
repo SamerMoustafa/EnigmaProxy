@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EnigmaServer
@@ -21,6 +22,10 @@ namespace EnigmaServer
         protected const int PORT = 90;
 
         protected const int BACKLOG = 5;
+
+        protected const int KEEPALIVE_TTL = 2000;
+
+        protected const int KEEPALIVE_INTERVAL = 2000;
 
         protected List<Client> Clients = new List<Client>();
 
@@ -46,6 +51,29 @@ namespace EnigmaServer
             AcceptClients();
             _Log.Log("Server is Listening for Connection on Port "+PORT, this);
             _Log.EndSection();
+            KeepAlive();
+        }
+
+        protected void KeepAlive()
+        {
+            new Thread(new ThreadStart(() => {
+                Client[] ClientsArray = Clients.ToArray();
+                foreach(Client client in ClientsArray)
+                {
+                    try
+                    {
+                        client.Socket.Send(new byte[1] { 0 });
+                    }
+                    catch(Exception ex)
+                    {
+                        int ClientIndex = Clients.IndexOf(client);
+                        _Log.Log("Client #" + ClientIndex + " Disconnected, Shutting Down ....");
+                        client.Shutdown(ex.Message);
+                        Clients.Remove(client);
+                    }
+                }
+                Thread.Sleep(KEEPALIVE_INTERVAL);
+            })).Start();
         }
 
         public void RemoveClient(Client client)
@@ -65,7 +93,6 @@ namespace EnigmaServer
 
         private void AcceptCallback(IAsyncResult ar)
         {
-
             Socket connectedSocket = _ServerSocket.EndAccept(ar);
             _Log.Log("A Client Requested to Connect to Server....", this);
             Client client = new Client(connectedSocket);
