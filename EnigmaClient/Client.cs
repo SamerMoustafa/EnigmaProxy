@@ -13,6 +13,8 @@ namespace EnigmaClient
 
         protected Server _Server;
 
+        protected Logger _Log = Logger.GetInstance();
+
         protected Client()
         {
             Initialize();
@@ -29,7 +31,27 @@ namespace EnigmaClient
 
         protected void Initialize()
         {
+            _Log.Section("Client Initialization");
+            _Log.Log("Initialize Server Object", this);
             _Server = Server.GetInstance();
+            _Log.Log("Inject Event Handler for Server Connectivity", this);
+            _Server.OnServerConnected += _Server_OnServerConnected;
+            _Log.EndSection();
+            
+            _Server.Connect();
+        }
+
+        private void _Server_OnServerConnected()
+        {
+            _Log.Log("Client Announced with Server Connectivity", this);
+            _Log.Log("Request a Public Key for Further Connections.....", this);
+            _Server.OnServerShakeHand += _Server_OnServerShakeHand;
+            _Server.Shakehand();
+        }
+
+        private void _Server_OnServerShakeHand()
+        {
+            
         }
     }
 }

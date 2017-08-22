@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EnigmaLibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ namespace EnigmaClient
             Console.Title = "[Enigma] Client";
             Console.ForegroundColor = ConsoleColor.Cyan;
             //Initialize Client
+            Logger.GetInstance().Log("Initializing Client Object ..", "Main");
             Client.GetInstance();
             String InlineCommand = Console.ReadLine();
             while(InlineCommand != "exit")
