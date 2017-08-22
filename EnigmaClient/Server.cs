@@ -47,7 +47,14 @@ namespace EnigmaClient
                 }
                 attempts++;
             }
-            _Log.Log("Server Connected after " + attempts + " attempt(s)", this);
+            _Log.Log("Connected to Server after " + attempts + " attempt(s)", this);
+            _Log.Log("Start Asynchronous Communications with Server", this);
+            Async();
+        }
+
+        protected void Async()
+        {
+
         }
 
 

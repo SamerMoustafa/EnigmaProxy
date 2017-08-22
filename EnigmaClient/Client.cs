@@ -11,6 +11,8 @@ namespace EnigmaClient
     {
         protected static Client _Instance = null;
 
+        protected Server _Server;
+
         protected Client()
         {
             Initialize();
@@ -27,7 +29,7 @@ namespace EnigmaClient
 
         protected void Initialize()
         {
-            Server.GetInstance();
+            _Server = Server.GetInstance();
         }
     }
 }

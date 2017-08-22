@@ -8,5 +8,7 @@ namespace EnigmaLibrary
 {
     interface IRequestHandler
     {
+        void ParseReques(Request request);
+        String[] GetRequests();
     }
 }
