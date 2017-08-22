@@ -13,7 +13,8 @@ namespace EnigmaClient
             //Set Console Title
             Console.Title = "[Enigma] Client";
             Console.ForegroundColor = ConsoleColor.Cyan;
-
+            //Initialize Client
+            Client.GetInstance();
             String InlineCommand = Console.ReadLine();
             while(InlineCommand != "exit")
             {
