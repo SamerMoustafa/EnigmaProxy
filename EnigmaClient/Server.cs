@@ -17,11 +17,23 @@ namespace EnigmaClient
 
         public Byte[] PublicKey;
 
+        public byte[] RecieveBytes = new byte[2048];
+
         protected Logger _Log = Logger.GetInstance();
+
+        public delegate void ServerConnected();
+
+        public event ServerConnected OnServerConnected;
+
+        public delegate void ServerShakeHanded();
+
+        public event ServerShakeHanded OnServerShakeHand;
+
+        protected Boolean IsConnected = false;
 
         protected Server()
         {
-            Initiate();
+            Initialize();
         }
 
         public static Server GetInstance()
@@ -29,32 +41,9 @@ namespace EnigmaClient
             return _Instance;
         }
 
-        protected void Initiate()
+        protected void Initialize()
         {
-            _Log.Log("Initialize Server Object", this);
-            _ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            _Log.Log("Try Connect to Server .... ", this);
-            int attempts = 0;
-            while(_ServerSocket.Connected != true)
-            {
-                try
-                {
-                    _ServerSocket.Connect("192.168.1.108", 90);
-                }
-                catch(Exception ex)
-                {
-                    _Log.Log(ex.Message, this);
-                }
-                attempts++;
-            }
-            _Log.Log("Connected to Server after " + attempts + " attempt(s)", this);
-            _Log.Log("Start Asynchronous Communications with Server", this);
-            Async();
-        }
-
-        protected void Async()
-        {
-
+            
         }
 
 
