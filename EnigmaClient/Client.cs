@@ -36,9 +36,14 @@ namespace EnigmaClient
             _Server = Server.GetInstance();
             _Log.Log("Inject Event Handler for Server Connectivity", this);
             _Server.OnServerConnected += _Server_OnServerConnected;
+            _Server.OnServerDisconnected += _Server_OnServerDisconnected;
             _Log.EndSection();
-            
             _Server.Connect();
+        }
+
+        private void _Server_OnServerDisconnected()
+        {
+            //_Log.Log("")
         }
 
         private void _Server_OnServerConnected()
@@ -52,6 +57,8 @@ namespace EnigmaClient
         private void _Server_OnServerShakeHand()
         {
             _Log.Log("Recieved a Public Key with Size of " + _Server.PublicKey.Length + " Bytes", this);
+            _Log.Log("Start Keep Alive Protocol with Server ...", this);
+            _Server.KeepAlive();
         }
     }
 }

@@ -17,6 +17,7 @@ namespace EnigmaClient
             //Initialize Client
             Logger.GetInstance().Log("Initializing Client Object ..", "Main");
             Client.GetInstance();
+            Console.Write("Enter Command : ");
             String InlineCommand = Console.ReadLine();
             while(InlineCommand != "exit")
             {

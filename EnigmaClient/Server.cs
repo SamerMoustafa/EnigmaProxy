@@ -40,6 +40,12 @@ namespace EnigmaClient
 
         protected bool _IsConnected = false;
 
+        protected const short KEEPALIVE_TTL = 42;
+
+        protected const int KEEPALIVE_INTERVAL = 2000;
+
+        protected bool _KeepAliveActive = true;
+
         public Boolean IsConnected {
             get { return _IsConnected; }
             protected set {
@@ -57,6 +63,60 @@ namespace EnigmaClient
         public static Server GetInstance()
         {
             return _Instance;
+        }
+
+        public void KeepAlive()
+        {
+            if(_KeepAliveActive == false)
+            {
+                _KeepAliveActive = true;
+                return;
+            }
+            new Thread(new ThreadStart(() => {
+                while (true)
+                {
+                    if (!_KeepAliveActive) { continue; }
+                    try
+                    {
+                        if(IsConnected)
+                        {
+                            short originalTTL = _ServerSocket.Ttl;
+                            _ServerSocket.Ttl = KEEPALIVE_TTL;
+                            _ServerSocket.Send(new byte[1] { 0 });
+                            _ServerSocket.Ttl = originalTTL;
+                        }
+                        else
+                        {
+                            _Log.Log("Detected Server Disconnection, Will Try to Reconnect..... ", this);
+                            int Attempts = 0;
+                            _ServerSocket.Shutdown(SocketShutdown.Both);
+                            _ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                            while (!IsConnected)
+                            {
+                                
+                                try {
+                                    _ServerSocket.Connect(ServerHost, ServerPort);
+                                    IsConnected = true;
+                                    _KeepAliveActive = false;
+                                }
+                                catch (Exception ex) {
+                                    _Log.Log(ex.Message);
+                                }
+                                Attempts++;
+                            }
+                            _Log.Log("ReConnected to the Proxy Server within " + Attempts + " Attemp(s).", this);
+                            
+                        }
+                        
+                    }
+                    catch (Exception ex)
+                    {
+                        _Log.Log("Server Disconnected.....", this);
+                        IsConnected = false;
+                    }
+                    Thread.Sleep(KEEPALIVE_INTERVAL);
+                }
+            })).Start();
         }
 
         public void Connect()
@@ -92,6 +152,7 @@ namespace EnigmaClient
                     PublicKey = new byte[recieved];
                     Array.Copy(recieveBuffer, PublicKey, recieved);
                     OnServerShakeHand();
+
                 }
                 catch (Exception ex)
                 {

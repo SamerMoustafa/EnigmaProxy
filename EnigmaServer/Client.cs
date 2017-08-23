@@ -47,6 +47,9 @@ namespace EnigmaServer
                     int RequestCode = (int)Buffer[0];
                     switch (RequestCode)
                     {
+                        case 0:
+                            //Ignore it's Just Keep Alive Check
+                            break;
                         case 1:
                             _Log.Log("Client Requested a Handshake ...", this);
                             SendPublicKey();

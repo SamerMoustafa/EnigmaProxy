@@ -23,7 +23,7 @@ namespace EnigmaServer
 
         protected const int BACKLOG = 5;
 
-        protected const int KEEPALIVE_TTL = 2000;
+        protected const short KEEPALIVE_TTL = 42;
 
         protected const int KEEPALIVE_INTERVAL = 2000;
 
@@ -34,7 +34,6 @@ namespace EnigmaServer
         protected Server() { }
 
         
-
         public static Server GetInstance()
         {
             return _Instance;
@@ -57,22 +56,29 @@ namespace EnigmaServer
         protected void KeepAlive()
         {
             new Thread(new ThreadStart(() => {
-                Client[] ClientsArray = Clients.ToArray();
-                foreach(Client client in ClientsArray)
+                while (true)
                 {
-                    try
+                    Client[] ClientsArray = Clients.ToArray();
+                    foreach (Client client in ClientsArray)
                     {
-                        client.Socket.Send(new byte[1] { 0 });
+                        try {
+                            short originalTTL = client.Socket.Ttl;
+                            client.Socket.Ttl = KEEPALIVE_TTL;
+                            client.Socket.Send(new byte[1] { 0 });
+                            client.Socket.Ttl = originalTTL;
+                        }
+                        catch (Exception ex)
+                        {
+                            
+                            int ClientIndex = Clients.IndexOf(client);
+                            _Log.Log("Client #" + ClientIndex + " Disconnected, Shutting Down ....");
+                            client.Shutdown(ex.Message);
+                            Clients.Remove(client);
+                        }
                     }
-                    catch(Exception ex)
-                    {
-                        int ClientIndex = Clients.IndexOf(client);
-                        _Log.Log("Client #" + ClientIndex + " Disconnected, Shutting Down ....");
-                        client.Shutdown(ex.Message);
-                        Clients.Remove(client);
-                    }
+                    Thread.Sleep(KEEPALIVE_INTERVAL);
                 }
-                Thread.Sleep(KEEPALIVE_INTERVAL);
+                
             })).Start();
         }
 
